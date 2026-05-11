@@ -48,7 +48,7 @@ jobs:
         shell: cmd
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          C:\msys64\usr\bin\bash.exe -lc "cd ffmpeg && ./configure --toolchain=msvc --arch=amd64 --disable-static --enable-shared --disable-programs --disable-doc --disable-debug --enable-network --disable-lzma --enable-pic --disable-vulkan --disable-v4l2-m2m --disable-decoder=truemotion1 && make -j$(nproc)"
+          C:\msys64\usr\bin\bash.exe -c "pwd && ls && cd ffmpeg && ./configure --toolchain=msvc --arch=amd64 --disable-static --enable-shared --disable-programs --disable-doc --disable-debug --enable-network --disable-lzma --enable-pic --disable-vulkan --disable-v4l2-m2m --disable-decoder=truemotion1 && make -j$(nproc)"
 
       - name: Collect Qt-compatible runtime DLLs
         shell: powershell
