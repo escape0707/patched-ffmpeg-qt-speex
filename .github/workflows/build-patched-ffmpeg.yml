@@ -33,11 +33,12 @@ jobs:
           path: ffmpeg
           fetch-depth: 0
 
-      - name: Clone and patch FFmpeg
-        shell: msys2 {0}
+      - name: Patch FFmpeg Speex decoder
+        shell: powershell
         run: |
-          set -euxo pipefail
-          cd ffmpeg
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          Set-Location ffmpeg
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git cherry-pick -x 4a0e1cfc6f33d152e007849f6de7028d651de2af
