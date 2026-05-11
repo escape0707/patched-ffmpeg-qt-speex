@@ -1,0 +1,70 @@
+name: Build patched FFmpeg for Qt Speex
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Windows MSVC shared DLLs
+    runs-on: windows-2022
+
+    steps:
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            make
+            diffutils
+            pkgconf
+            yasm
+            nasm
+
+      - name: Clone and patch FFmpeg
+        shell: msys2 {0}
+        run: |
+          set -euxo pipefail
+          git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
+          cd ffmpeg
+          git checkout n7.1.3
+          git cherry-pick -x 4a0e1cfc6f33d152e007849f6de7028d651de2af
+          git cherry-pick -x c14b837dedade432a5f95981c3b1677099015376
+
+      - name: Configure and build FFmpeg
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          C:\msys64\usr\bin\bash.exe -lc "cd ffmpeg && ./configure --toolchain=msvc --arch=amd64 --disable-static --enable-shared --disable-programs --disable-doc --disable-debug --enable-network --disable-lzma --enable-pic --disable-vulkan --disable-v4l2-m2m --disable-decoder=truemotion1 && make -j$(nproc)"
+
+      - name: Collect Qt-compatible runtime DLLs
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force patched-ffmpeg-dlls | Out-Null
+          $dlls = @(
+            "avcodec-61.dll",
+            "avformat-61.dll",
+            "avutil-59.dll",
+            "swresample-5.dll",
+            "swscale-8.dll"
+          )
+          foreach ($dll in $dlls) {
+            $match = Get-ChildItem -Path . -Recurse -Filter $dll | Select-Object -First 1
+            if (-not $match) {
+              throw "Could not find $dll"
+            }
+            Copy-Item -LiteralPath $match.FullName -Destination patched-ffmpeg-dlls
+          }
+          Get-ChildItem patched-ffmpeg-dlls
+
+      - name: Upload DLL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: patched-ffmpeg-n7.1.3-speex-msvc-x64
+          if-no-files-found: error
+          retention-days: 14
+          path: patched-ffmpeg-dlls/*.dll
