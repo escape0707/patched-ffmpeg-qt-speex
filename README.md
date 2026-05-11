@@ -1,5 +1,7 @@
 # Patched FFmpeg DLLs for Qt Multimedia Speex Testing
 
+Upstream issue: https://github.com/xiaoyifang/goldendict-ng/issues/1738#issuecomment-4419566511
+
 This repository builds FFmpeg 7.1.3 Windows shared DLLs with two upstream
 Speex decoder fixes cherry-picked from FFmpeg master:
 
@@ -12,4 +14,3 @@ GoldenDict-ng pronunciation audio.
 
 Trigger the workflow manually from GitHub Actions. The artifact contains the
 runtime DLLs to test against a portable GoldenDict-ng Windows build.
-
