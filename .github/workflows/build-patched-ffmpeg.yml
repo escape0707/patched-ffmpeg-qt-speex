@@ -25,13 +25,21 @@ jobs:
             yasm
             nasm
 
+      - name: Check out FFmpeg
+        uses: actions/checkout@v4
+        with:
+          repository: FFmpeg/FFmpeg
+          ref: n7.1.3
+          path: ffmpeg
+          fetch-depth: 0
+
       - name: Clone and patch FFmpeg
         shell: msys2 {0}
         run: |
           set -euxo pipefail
-          git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
           cd ffmpeg
-          git checkout n7.1.3
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git cherry-pick -x 4a0e1cfc6f33d152e007849f6de7028d651de2af
           git cherry-pick -x c14b837dedade432a5f95981c3b1677099015376
 
